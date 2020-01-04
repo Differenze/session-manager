@@ -75,7 +75,7 @@ ul {
 	display: -webkit-box;
 }
 
-#main-saved {
+#edit-saved, #main-saved {
 	border-bottom: 1px solid #E8EAED;
 }
 

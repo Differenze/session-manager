@@ -38,6 +38,7 @@ var background = chrome.extension.getBackgroundPage();
 var state = {
 	name: "",
 	action: "",
+	id: "",
 	entered: ""
 };
 
@@ -46,7 +47,7 @@ var sessions = {
 	temp: localStorage.temp ? JSON.parse(localStorage.temp) : undefined,
 	
 	load: function(){
-		var $temp = $("#main-saved-temp"), $list = $("#main-saved-list");
+		var $temp = $("#main-saved-temp"), $list = $("#main-saved-list"), $main = $("#main-saved");
 		$temp.add($list).empty();
 		
 		if (sessions.temp) {
@@ -66,7 +67,8 @@ var sessions = {
 		
 		$("hr", "#main-saved").last().remove();
 		
-		$list.children().css("margin-right", Object.keys(sessions.list).length > 10 ? 5 : 0);
+		if(Object.keys(sessions.list).length > 10) $main.addClass("scroll");
+                else $main.removeClass("scroll");
 	},
 	display: function(name, count){
 		var prefix = "", session = name === null ? (name = "temp session", !count && (prefix = "the "), sessions.temp) : sessions.list[name];
@@ -111,7 +113,7 @@ var actions = {
 			next();
 		});
 		
-		background.ga("send", "event", "Action", "Import", state.entered);
+		background._gaq.push(["_trackEvent", "Action", "Import", state.entered]);
 	}],
 	
 	export: [function(){
@@ -121,7 +123,7 @@ var actions = {
 	}, function(){
 		$("#export-check").fadeIn().delay(2000).fadeOut();
 		
-		background.ga("send", "event", "Action", "Export");
+		background._gaq.push(["_trackEvent", "Action", "Export"]);
 	}],
 	
 	rename: [function(name){
@@ -146,7 +148,7 @@ var actions = {
 			delete sessions.list[oname];
 		}
 		
-		background.ga("send", "event", "Session", "Rename");
+		background._gaq.push(["_trackEvent", "Session", "Rename"]);
 	}],
 	
 	add: [function(name){
@@ -156,7 +158,7 @@ var actions = {
 			Array.prototype.push.apply(name === null ? sessions.temp : sessions.list[name], tabs);
 		});
 		
-		background.ga("send", "event", name === null ? "Temp": "Session", "AddWin");
+		background._gaq.push(["_trackEvent", name === null ? "Temp": "Session", "AddWin"]);
 	}],
 	
 	tab: [function(name){
@@ -167,19 +169,50 @@ var actions = {
 			sessions.load();
 		});
 		
-		background.ga("send", "event", name === null ? "Temp": "Session", "AddTab");
+		background._gaq.push(["_trackEvent", name === null ? "Temp": "Session", "AddTab"]);
 	}],
 	
 	replace: [function(name){
 		utils.confirm("Are you sure you want to replace " + sessions.display(name) + " with the current window's tabs?");
 	}, function(name){
-		background.ga("send", "event", "Session", sessions.list[name] ? "Replace" : "Save");
+		background._gaq.push(["_trackEvent", "Session", sessions.list[name] ? "Replace" : "Save"]);
 		
 		utils.tabs(function(tabs){
 			sessions.list[name] = tabs;
 		});
 	}, function(name){
 		utils.confirm("Are you sure you want to replace " + sessions.display(name) + " with the session being saved?");
+	}],
+	
+	edit: [function(name){
+		$("#edit-legend").html("Edit " + utils.escape(name));
+
+		
+                var $list = $("#edit-saved-session"), $main = $("#edit-saved");
+		
+		$list.html("");
+                $list.attr("data-name", name)
+		$.each(sessions.list[name], function(n){
+                        console.log(sessions.list[name][n]);
+                        var $url = utils.escape(sessions.list[name][n]);
+			$("<div/>").html("<big><a title=\"" + $url + "\">" + $url + "</a></big><a>&times;</a><hr>").attr("data-name", sessions.list[name][n]).appendTo($list);
+		});
+		
+		if(Object.keys(sessions.list[name]).length > 10) $main.addClass("scroll");
+                else $main.removeClass("scroll");
+		
+		utils.view("edit");
+		$("#edit-text").val("").focus();
+	}, function(name){
+                var $list = $("#edit-saved-session")[0], tabs = [];
+                
+                name = $list.dataset.name;
+		$.each($list.children, function(n, e){
+                        if((!(e.style.opacity)) || (e.style.opacity > 0.9)) tabs.push(e.dataset.name);
+		});
+                
+		sessions.list[name] = tabs;
+		utils.view("main");
 	}],
 	
 	remove: [function(name){
@@ -191,7 +224,24 @@ var actions = {
 			delete sessions.list[name];
 		}
 		
-		background.ga("send", "event", name === null ? "Temp" : "Session", "Remove");
+		background._gaq.push(["_trackEvent", name === null ? "Temp" : "Session", "Remove"]);
+	}],
+
+	removeURL: [function(target){
+		console.log("Remove " + target + "?");
+                if(target.innerHTML == "+") {
+                        target.innerHTML = "&times";
+                        target.parentElement.style.opacity = "1";
+                } else {
+                        target.innerHTML = "+";
+                        target.parentElement.style.opacity = ".3";
+                }
+	}],
+
+	openURL: [function(target){
+		chrome.windows.getCurrent(function(win){
+			background.openSession(win.id, [target.title], e, false) !== false && window.close();
+		});
 	}],
 	
 	savetemp: [function(){
@@ -199,7 +249,7 @@ var actions = {
 			sessions.temp = tabs;
 		});
 		
-		background.ga("send", "event", "Temp", "Save");
+		background._gaq.push(["_trackEvent", "Temp", "Save"]);
 	}],
 	
 	save: [function(){
@@ -243,6 +293,27 @@ $("#main-saved-list").on("click", "big, div > a:not([title])", function(){
 	} else {
 		utils.action(action);
 	}
+}).on("click", "div > a[title]", function(e){
+	state.name = this.parentNode.dataset.name;
+	state.id = "";
+        utils.action("edit");
+});
+
+$("#edit-saved-session").on("click", "big, div > a:not([title])", function(e){
+	state.name = e.target;
+
+	if (this.tagName === "BIG") {
+		chrome.windows.getAll(function(wins) {
+			for(var i = 0; i < wins.length; i++) if(wins[i].id == state.id) {
+				i = wins.length + 5;
+				chrome.tabs.create({windowId: state.id, url: e.target.title, active: true});
+				chrome.windows.update(state.id, {focused: true});
+			}
+			if (i < wins.length + 5) chrome.windows.create({ url: e.target.title }, function(win) {
+				state.id = win.id;
+			}); 
+		}); 
+	} else utils.action("removeURL");
 });
 
 $("#main-saved-temp").on("click", "a:not([title])", function(e){

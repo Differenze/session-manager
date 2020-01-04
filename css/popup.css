@@ -1,6 +1,6 @@
 /*** global ***/
 a {
-	color: blue;
+	color: #1155CC;
 	cursor: pointer;
 	text-decoration: none;
 }
@@ -13,27 +13,41 @@ a[title] {
 }
 
 body {
-	font: 11px/14px Arial, sans-serif;
-	margin: 5px 8px 0px 8px;
+	font-size: 12px;
+	border: 1px solid #E8EAED;
+	border-top: none;
+	padding: 0 1px;
 	width: 300px;
 }
 body > fieldset {
 	display: none;
 }
 
-button + button {
-	margin-left: -1px;
+input {
+    border: 1px solid #E8EAED;
+    border-radius: 5px;
+    padding: 0 9px;
+    width: calc(100% - 9px);
+}
+
+button {
+    color: #1A73E8;
+    background: transparent;
+    font-weight: bold;
+    border: 1px solid #E8EAED;
+    border-radius: 5px;
+    padding: 8px 16px;
+    margin-left: 5px;
 }
 
 fieldset {
-	border: 1px solid #B2B2B2;
-	margin: 0 2px 10px 2px;
-	padding: 2px 5px 4px 5px;
+	padding: 9px 32px;
+	margin-top: 9px;
 }
 
 hr {
-	border-top: 1px solid #B2B2B2;
-	margin: 5px auto;
+	border-top: 1px solid #E8EAED;
+	margin: 4px auto;
 }
 
 legend {
@@ -61,19 +75,23 @@ ul {
 	display: -webkit-box;
 }
 
+#main-saved {
+	border-bottom: 1px solid #E8EAED;
+}
+
 #main-saved-temp {
 	font-style: italic;
 	text-align: center;
 }
 
-#main-saved-list {
-	max-height: 398px;
-	overflow: auto;
+#edit-saved-session, #main-saved-list {
+	font-size: 90%;
+	line-height: 140%;
 }
-#main-saved-list::-webkit-scrollbar {
+#edit-saved-session::-webkit-scrollbar, #main-saved-list::-webkit-scrollbar {
 	width: 8px;
 }
-#main-saved-list::-webkit-scrollbar-thumb {
+#edit-saved-session::-webkit-scrollbar-thumb, #main-saved-list::-webkit-scrollbar-thumb {
 	background: #B2B2B2;
 }
 #main-saved-list > div > big:hover {
@@ -81,18 +99,76 @@ ul {
 	cursor: pointer;
 	border-bottom: 1px dashed #B2B2B2;
 }
-#main-saved-list > div > big + a {
+#edit-saved-session > div > big + a, #main-saved-list > div > big + a {
 	float: right;
 	font-size: larger;
 	margin-top: -3px;
 }
-#main-saved-list > div > span {
+#edit-saved-session > div > span, #main-saved-list > div > span {
 	float: right;
 }
-
 #main-changelog {
 	background: #DDD;
 	display: none;
+}
+
+.scroll   {
+    padding-right: 14px;
+}
+.scroll #main-saved-temp {
+	margin-right: 18px;
+}
+.scroll #edit-saved-session, .scroll #main-saved-list {
+    padding-right: 5px;
+    max-height: 400px;
+    overflow: auto;
+}
+.scroll #edit-saved-session > div, .scroll #main-saved-list > div {
+    padding-right: 5px;
+}
+
+
+
+/*** import view ***/
+#rename input {
+	-webkit-box-flex: unset;
+	width: calc(100% - 20px);
+	height: 32px;
+	margin-bottom: 43px;
+}
+
+#rename button, #edit button {
+	margin-left: -100%;
+	position: relative;
+	top: 43px;
+}
+
+#rename button + button, #edit button + button {
+	margin-left: 5px;
+	position: relative;
+	top: 43px;
+}
+
+#edit button {
+    position: unset!important;
+}
+
+#edit .box>div {
+	-webkit-box-flex: unset;
+	width: 100%;
+	height: 32px;
+}
+
+
+/*** edit view ***/
+#edit {
+	display: none;
+}
+#edit a {
+	max-width: 215px;
+    display: inline-block;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 
@@ -109,6 +185,7 @@ ul {
 /*** export view ***/
 #export > span, #confirm > span {
 	float: right;
+	padding: 16px 0 5px;
 }
 
 #export-check {

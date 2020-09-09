@@ -56,19 +56,17 @@ ul {
 }
 
 .box {
-	display: -webkit-box;
+	display: flex;
 }
 
 .flex {
-	-webkit-box-flex: 1;
 	display: block;
 }
 
-
 /*** main view ***/
 #main {
-	-webkit-box-orient: vertical;
-	display: -webkit-box;
+	display: flex;
+	flex-direction: column;
 }
 
 #edit-saved, #main-saved {

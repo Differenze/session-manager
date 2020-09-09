@@ -113,7 +113,6 @@ var actions = {
 			next();
 		});
 		
-		background._gaq.push(["_trackEvent", "Action", "Import", state.entered]);
 	}],
 	
 	export: [function(){
@@ -123,7 +122,6 @@ var actions = {
 	}, function(){
 		$("#export-check").fadeIn().delay(2000).fadeOut();
 		
-		background._gaq.push(["_trackEvent", "Action", "Export"]);
 	}],
 	
 	rename: [function(name){
@@ -148,7 +146,6 @@ var actions = {
 			delete sessions.list[oname];
 		}
 		
-		background._gaq.push(["_trackEvent", "Session", "Rename"]);
 	}],
 	
 	add: [function(name){
@@ -158,7 +155,6 @@ var actions = {
 			Array.prototype.push.apply(name === null ? sessions.temp : sessions.list[name], tabs);
 		});
 		
-		background._gaq.push(["_trackEvent", name === null ? "Temp": "Session", "AddWin"]);
 	}],
 	
 	tab: [function(name){
@@ -169,13 +165,11 @@ var actions = {
 			sessions.load();
 		});
 		
-		background._gaq.push(["_trackEvent", name === null ? "Temp": "Session", "AddTab"]);
 	}],
 	
 	replace: [function(name){
 		utils.confirm("Are you sure you want to replace " + sessions.display(name) + " with the current window's tabs?");
 	}, function(name){
-		background._gaq.push(["_trackEvent", "Session", sessions.list[name] ? "Replace" : "Save"]);
 		
 		utils.tabs(function(tabs){
 			sessions.list[name] = tabs;
@@ -224,7 +218,6 @@ var actions = {
 			delete sessions.list[name];
 		}
 		
-		background._gaq.push(["_trackEvent", name === null ? "Temp" : "Session", "Remove"]);
 	}],
 
 	removeURL: [function(target){
@@ -249,7 +242,6 @@ var actions = {
 			sessions.temp = tabs;
 		});
 		
-		background._gaq.push(["_trackEvent", "Temp", "Save"]);
 	}],
 	
 	save: [function(){
@@ -353,10 +345,6 @@ if (location.search) {
 	});
 	
 	utils.view("import");
-	
-	background.ga("send", "pageview", "/import");
-} else {
-	background.ga("send", "pageview", "/popup");
 }
 
 })();

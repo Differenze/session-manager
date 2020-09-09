@@ -23,5 +23,3 @@ $("#pinned-noreplace").change(function () {
 		delete localStorage.noreplacingpinned;
 	}
 }).prop("checked", localStorage.noreplacingpinned === "true");
-
-chrome.extension.getBackgroundPage().ga("send", "pageview", "/options");
